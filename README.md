@@ -31,7 +31,7 @@ ping archlinux.org
 1. swap (/dev/sda2)
 2. / (/dev/sda5)
 3. /home (/dev/sda3)
-4. /boot (dev/sda1)
+4. /boot (/dev/sda1)
 5. /usr(/dev/sda4 註:不建議，後面解釋)
 上面sda數字其實隨意，下面格式化磁區會按照這邊的數字處理
 
@@ -46,9 +46,9 @@ mkswap /dev/sda2
 ```
 最後分別是檔案目錄
 ```bash
-mkfs -t ext4  /dev/sda3
-mkfs -t ext4  /dev/sda4
-mkfs -t ext4  /dev/sda5
+mkfs -t ext4 /dev/sda3
+mkfs -t ext4 /dev/sda4
+mkfs -t ext4 /dev/sda5
 ```
 ### 掛載磁區
 這邊重點就是先把 / 掛到 /mnt，然後根據你獨立分割出來的資料夾例如: /boot /home /usr 下去建立資料夾再掛載
