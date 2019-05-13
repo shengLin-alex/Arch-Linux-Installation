@@ -67,3 +67,214 @@ mount /dev/sda4 /mnt/usr
 pacstrap /mnt base base-devel
 ```
 ### 建立 fstab
+```bash
+genfstab -U /mnt >> /mnt/etc/fstab
+```
+必要的話用blkid 查詢 uuid，再用 vim 來檢查
+```bash
+blkid
+vim /mnt/etc/fstab
+```
+關於 SSD Trim 指令等安裝完整個系統再改就好
+### chroot 到新系統
+```bash
+arch-chroot /mnt
+```
+完成之後 root 就會換成新的系統根目錄 /
+### 設定時區
+這邊其實不確定有沒有成功，反正到時候安裝桌面環境之後再處理也行
+```bash
+ln -sf /usr/share/zoneinfo/Asia/Taipei /etc/localtime
+hwclock --systohc
+```
+### 設定語言
+這邊記得先設定英文就好，總之進桌面環境再改
+```bash
+echo "en_US.UTF-8 UTF-8" > /etc/locale.gen;
+echo "LANG=en_US.UTF-8" > /etc/locale.conf;
+locale-gen
+```
+### 設定電腦名稱
+```bash
+echo "your-pc-name" > /etc/hostname
+```
+然後安裝 vim (這邊安裝完桌面環境之後再處理也可以)
+```bash
+pacman -Sy vim
+vim /etc/hosts
+```
+加入以下
+```bash
+127.0.0.1 localhost.localdomain localhost
+::1 localhost.localdomain localhost
+```
+### 建立開機映像
+```bash
+mkinitcpio -p linux
+```
+### 設定 root
+```bash
+passwd
+```
+### 啟動載入程式與 grub
+```bash
+pacman -Sy grub os-prober efibootmgr
+```
+grub 用於建立開機選單
+os-prober 用於偵測其他 OS(不打算雙系統的話這個就直接跳過)
+```bash
+os-prober
+grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=grub
+grub-mkconfig -o /boot/grub/grub.cfg
+```
+### 安裝必要網路工具
+```bash
+pacman -S net-tools
+pacman -S wireless_tools
+pacman -S dhclient
+pacman -S wpa_supplicant
+```
+### 重啟系統
+離開 chroot 之前先啟動 dhcpd.service
+```bash
+systemctl enable dhcpd.service
+exit
+umount -R /mnt
+reboot
+```
+### 初次進入系統
+這個時候你會發現你只會進入 rootfs，沒錯這邊就是上面 /usr 獨立磁區的伏筆，當然如果你沒有分割 /usr 為獨立磁區以下操作直接跳過
+
+首先先測試 /new_root/sbin
+```bash
+ls -l /new_root/sbin
+```
+應該會說目錄不存在
+
+根據 Arch Linux wiki:
+```
+/usr as a separate partition
+If you keep /usr as a separate partition, you must adhere to the following requirements:
+
+Add the fsck hook, mark /usr with a passno of 0 in /etc/fstab. While recommended for everyone, it is mandatory if you want your /usr partition to be fsck'ed at boot-up. Without this hook, /usr will never be fsck'd.
+If not using the systemd hook, add the usr hook. This will mount the /usr partition after root is mounted.
+```
+解決方法:
+1. 透過 USB 進入 chroot
+2. 接著編輯 mkinitcpio.conf
+```bash
+vim /etc/mkinitcpio.conf
+```
+找到 HOOK 那一行，後面加入 shutdown usr fsck，完成後看起來會類似以下
+```bash
+HOOKS=(base udev autodetect sata filesystems shutdown usr fsck)
+```
+接著重新 mkinitcpio
+```bash
+mkinitcpio -p linux
+```
+最後編輯 fstab 將 /usr 那一行 passno(最後面的數字)改成 0，看起來會類似以下
+```bash
+UUID="some-uuid"	/usr      	ext4      	noatime,nodiratime,discard,rw,relatime	0 0
+```
+完成之後退出 chroot 重開機，應該會成功進入系統
+
+### 初次進入系統(正式)
+#### 安裝桌面環境
+可以選擇 gnome 或 kde 等等，以下使用 gnome
+```bash
+pacman -Sy gnome gnome-extra
+```
+設定開機啟動
+```bash
+systemctl enable NetworkManager
+systemctl enable gdm
+```
+#### 安裝 sudo
+```bash
+pacman -S sudo
+```
+設定群組
+```bash
+vim /etc/sudoers
+```
+找到以下這行(約82行)
+```
+# %wheel ALL=(ALL) ALL
+```
+把前面的 # 刪除
+#### 建立使用者
+```bash
+useradd -m -u 1001 "your-user-name"
+passwd "your-user-name"
+usermod "your-user-name" -G wheel
+```
+### 重開機進入 gnome
+```bash
+reboot
+```
+### 安裝 yay
+yay 用來處理 AUR 套件，建議安裝
+```bash
+sudo vim /etc/pacman.conf
+```
+找到以下(約93行)，並刪除前面 # ，兩行都要
+```
+#[multilib]
+#Include = /etc/pacman.d/mirrorlist
+```
+接著安裝必要套件
+```bash
+pacman -Sy yajl git
+```
+clone 套件安裝源
+```bash
+git clone https://aur.archlinux.org/package-query.git
+git clone https://aur.archlinux.org/yay.git
+```
+安裝
+```bash
+cd package-query
+makepkg -si
+cd ../yay
+makepkg -si
+```
+### 安裝 fcitx
+fcitx 用於輸入法
+```bash
+yaourt -Sy fcitx-im
+yaourt -S fcitx-chewing
+yaourt -S fcitx-configtool
+```
+使用 vim(或其他編輯器開啟 /etc/profile)
+```
+sudo vim /etc/profile
+```
+在最下面加入以下三行
+```bash
+export GTK_IM_MODULE=fcitx
+export QT_IM_MODULE=fcitx
+export XMODIFIERS="@im=fcitx"
+```
+開啟 Fcitx Configuration 圖形界面，新增 input method，找到 Chewing 並新增
+### 安裝字形
+由於內建無中文，所以中文會呈現亂碼，以下安裝繁體中文、簡體中文與日文(你懂的)
+這邊可以自行去找喜歡的字體
+```bash
+yay -S adobe-source-han-sans-cn-fonts
+yay -S adobe-source-han-sans-tw-fonts
+yay -S adobe-source-han-sans-jp-fonts
+```
+### 安裝 ntfs 支援
+由於 Linux 預設不支援 ntfs，如果有外接硬碟需求(你懂的)，記得安裝
+```bash
+yay -S ntfs-3g
+```
+### 完成
+到這邊基本上已經完成安裝，剩下的遇到再說，建議先對系統進行一次基本備份，畢竟目前處於最乾淨的狀態
+
+先安裝 rsync，再備份
+```bash
+yay -S rsync
+rsync -aAXv /* /path/to/backup/folder --exclude={/dev/*,/proc/*,/sys/*,/tmp/*,/run/*,/mnt/*,/media/*,/lost+found}
+```
