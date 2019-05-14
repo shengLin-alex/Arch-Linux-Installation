@@ -346,9 +346,9 @@ makepkg -si
 fcitx 用於輸入法
 
 ```bash
-yaourt -Sy fcitx-im
-yaourt -S fcitx-chewing
-yaourt -S fcitx-configtool
+yay -Sy fcitx-im
+yay -S fcitx-chewing
+yay -S fcitx-configtool
 ```
 
 使用 vim(或其他編輯器開啟 /etc/profile)
