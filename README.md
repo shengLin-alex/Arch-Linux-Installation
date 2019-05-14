@@ -272,7 +272,7 @@ yay -S ntfs-3g
 ```
 ### 設定雙顯卡
 由於一般筆電有雙顯卡(Intel & Nvidia)，因此這裡進行一些額外設定
-網路上爬到到教學基本上都是 bumblebee + bbswitch，然而設定方式極為複雜，以下提供一個較簡易的設定方式
+網路上爬到的教學基本上都是 bumblebee + bbswitch，然而設定方式極為複雜，以下提供一個較簡易的設定方式
 #### 安裝 bumblebee 與 bbswitch
 ```bash
 yay -S bumblebee bbswitch
