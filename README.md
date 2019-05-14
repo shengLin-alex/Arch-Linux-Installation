@@ -8,7 +8,7 @@ dd bs=4M if=/path/to/archlinux.iso of=/dev/sdx && sync
 ```
 ## 進入bios 用USB開機
 
-進bios用F2(ASUS)
+進 bios用 F2(ASUS)
 ## 驗證UEFI
 
 ```bash
@@ -34,8 +34,8 @@ ping archlinux.org
 ```
 註:以上指令雙引號不建議加
 ## 分割磁區
-### fdisk
-這邊跳過(反正就是用 fdisk)，基本上就是分:
+
+這邊跳過(MBR 用 fdisk；GPT用 gdisk)，基本上就是分:
 
 1. swap (/dev/sda2)
 
