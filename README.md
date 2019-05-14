@@ -456,13 +456,15 @@ sudo tee /proc/acpi/bbswitch <<< ON
 sudo tee /proc/acpi/bbswitch <<< OFF
 ```
 
-## 完成
+## 初次備份
 
-到這邊基本上已經完成安裝，剩下的遇到再說，建議先對系統進行一次基本備份，畢竟目前處於最乾淨的狀態
-
-先安裝 rsync，再備份
+建議先對系統進行一次基本備份，畢竟目前處於最乾淨的狀態，先安裝 rsync，再備份
 
 ```bash
 yay -S rsync
 rsync -aAXv /* /path/to/backup/folder --exclude={/dev/*,/proc/*,/sys/*,/tmp/*,/run/*,/mnt/*,/media/*,/lost+found}
 ```
+
+## 完成
+
+到這邊基本上已經完成安裝，剩下的遇到再說
