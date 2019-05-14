@@ -3,18 +3,24 @@
 
 ## Make Arch Linux Live USB
 
+前往 [archlinux.org](https://archlinux.org)下載官方 iso
+
 ```bash
 dd bs=4M if=/path/to/archlinux.iso of=/dev/sdx && sync
 ```
+
 ## 進入bios 用USB開機
 
 進 bios用 F2(ASUS)
+
 ## 驗證UEFI
 
 ```bash
 ls /sys/firmware/efi/efivars
 ```
+
 有顯示東西的話表示正確
+
 ## 設定網路連線
 
 這個部份用無線網卡處理
@@ -33,6 +39,7 @@ dhclient "介面卡名稱"
 ping archlinux.org
 ```
 註:以上指令雙引號不建議加
+
 ## 分割磁區
 
 這邊跳過(MBR 用 fdisk；GPT用 gdisk)，基本上就是分:
@@ -70,6 +77,7 @@ mkfs -t ext4 /dev/sda3
 mkfs -t ext4 /dev/sda4
 mkfs -t ext4 /dev/sda5
 ```
+
 ## 掛載磁區
 
 這邊重點就是先把 / 掛到 /mnt，然後根據你獨立分割出來的資料夾例如: /boot /home /usr 下去建立資料夾再掛載
@@ -203,7 +211,7 @@ reboot
 
 ## 初次進入系統
 
-這個時候你會發現你只會進入 rootfs，沒錯這邊就是上面 /usr 獨立磁區的伏筆，當然如果你沒有分割 /usr 為獨立磁區以下操作直接跳過
+這個時候你會發現你只會進入 rootfs，沒錯這邊就是上面 /usr 獨立磁區的伏筆，當然如果你沒有分割 /usr 為獨立磁區則以下操作直接跳過
 
 首先先測試 /new_root/sbin
 
@@ -367,7 +375,8 @@ export XMODIFIERS="@im=fcitx"
 
 開啟 Fcitx Configuration 圖形界面，新增 input method，找到 Chewing 並新增
 
-### 安裝字形
+## 安裝字形
+
 由於內建無中文，所以中文會呈現亂碼，以下安裝繁體中文、簡體中文與日文(你懂的)
 這邊可以自行去找喜歡的字體
 
