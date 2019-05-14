@@ -270,6 +270,49 @@ yay -S adobe-source-han-sans-jp-fonts
 ```bash
 yay -S ntfs-3g
 ```
+### 設定雙顯卡
+由於一般筆電有雙顯卡(Intel & Nvidia)，因此這裡進行一些額外設定
+網路上爬到到教學基本上都是 bumblebee + bbswitch，然而設定方式極為複雜，以下提供一個較簡易的設定方式
+#### 安裝 bumblebee 與 bbswitch
+```bash
+yay -S bumblebee bbswitch
+sudo gpasswd -a "username" bumblebee
+sudo systemctl enable bumblebeed.service
+```
+#### 安裝 nvidia
+```bash
+yay -S nvidia opencl-nvidia lib32-nvidia-utils lib32-opencl-nvidia mesa lib32-mesa-libgl xf86-video-intel
+```
+#### 設定 bumblebee
+```bash
+sudo vim /etc/bumblebee/bumblebee.conf
+```
+修改以下
+```bash
+Driver=nvidia
+
+[driver-nvidia]
+PMMethod=bbswitch
+```
+接著重開機
+#### 檢測
+```bash
+yay -S virtualgl
+optirun glxspheres64
+```
+會看到一個繪圖視窗輸出，表示成功，此時使用以下指令檢視 nvidia 繪圖卡工作中
+```bash
+nvidia-smi
+```
+關閉繪圖輸出視窗後再重新輸入
+```bash
+nvidia-smi
+```
+會發現 nvidia 自動關閉了，同時可以使用以下指令來手動強制啟動或關閉 nvidia
+```bash
+sudo tee /proc/acpi/bbswitch <<< ON
+sudo tee /proc/acpi/bbswitch <<< OFF
+```
 ### 完成
 到這邊基本上已經完成安裝，剩下的遇到再說，建議先對系統進行一次基本備份，畢竟目前處於最乾淨的狀態
 
