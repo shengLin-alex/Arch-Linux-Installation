@@ -456,6 +456,12 @@ sudo tee /proc/acpi/bbswitch <<< ON
 sudo tee /proc/acpi/bbswitch <<< OFF
 ```
 
+檢查 bbswitch 狀態
+
+```bash
+cat /proc/acpi/bbswitch
+```
+
 ## 初次備份
 
 建議先對系統進行一次基本備份，畢竟目前處於最乾淨的狀態，先安裝 rsync，再備份
