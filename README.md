@@ -125,6 +125,32 @@ arch-chroot /mnt
 
 完成之後 root 就會換成新的系統根目錄 /
 
+## 設定 pacman 的 mirrorlist
+
+由於指定 mirrorlist server 位置可以加速套件安裝，建議進行以下設定
+
+```bash
+vim /etc/pacman.conf
+```
+
+將以下區塊加入指定 Server:
+
+```
+[core]
+Server = http://archlinux.cs.nctu.edu.tw/$repo/os/$arch
+Include = /etc/pacman.d/mirrorlist
+
+[extra]
+Server = http://archlinux.cs.nctu.edu.tw/$repo/os/$arch
+Include = /etc/pacman.d/mirrorlist
+
+[community]
+Server = http://archlinux.cs.nctu.edu.tw/$repo/os/$arch
+Include = /etc/pacman.d/mirrorlist
+```
+
+使用交大 mirrorlist 為首選
+
 ## 設定時區
 
 這邊其實不確定有沒有成功，反正到時候安裝桌面環境之後再處理也行
