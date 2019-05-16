@@ -9,6 +9,8 @@
 dd bs=4M if=/path/to/archlinux.iso of=/dev/sdx && sync
 ```
 
+/dev/sdx 為 usb 裝置位置
+
 ## 進入bios 用USB開機
 
 進 bios用 F2(ASUS)
