@@ -386,7 +386,7 @@ yay -S adobe-source-han-sans-tw-fonts
 yay -S adobe-source-han-sans-jp-fonts
 ```
 
-## 安裝 ntfs 支援
+## 安裝 ntfs 支援(optional)
 
 由於 Linux 預設不支援 ntfs，如果有外接硬碟需求(你懂的)，記得安裝
 
@@ -394,7 +394,7 @@ yay -S adobe-source-han-sans-jp-fonts
 yay -S ntfs-3g
 ```
 
-## 設定雙顯卡
+## 設定雙顯卡(optional)
 
 由於一般筆電有雙顯卡(Intel & Nvidia)，因此這裡進行一些額外設定
 網路上爬到到教學基本上都是 bumblebee + bbswitch，然而設定方式極為複雜，以下提供一個較簡易的設定方式
@@ -461,6 +461,105 @@ sudo tee /proc/acpi/bbswitch <<< OFF
 ```bash
 cat /proc/acpi/bbswitch
 ```
+
+## 設定硬體加速(optional)
+
+由於 Linux 之下 chromium 預設不支援硬體加速，使用瀏覽器播放高清影片會造成高 CPU 使用率，以下設定方式參考自 [ArchWiki](https://wiki.archlinux.org/index.php/Hardware_video_acceleration)
+
+#### 安裝相關套件
+
+##### VAAPI
+
+```bash
+yay -S libva libva-utils libva-intel-driver libva-mesa-driver libva-vdpau-driver
+```
+
+##### VDPAU
+
+```bash
+yay -S libvdpau mesa-vdpau libvdpau-va-gl nouveau-fw vdpauinfo
+```
+
+##### 指定 driver
+
+```bash
+sudo gedit /etc/profile
+```
+
+參考下表，於 profile 最下面加入環境變數:
+
+| graphics card | LIBVA_DRIVER_NAME | VDPAU_DRIVER |
+|---------------|-------------------|--------------|
+| Intel         | i965              | va_gl        |
+| NVIDIA        | nouveau           | nouveau      |
+| AMD           | radeonsi          | radeonsi     |
+
+註: 以下只列出常見裝置設定值，詳細請至 [Hardware_video_acceleration](https://wiki.archlinux.org/index.php/Hardware_video_acceleration)參考
+
+注意: 如果是內顯加獨顯的電腦，要指定使用獨顯的話需要再設定 DRI_PRIME=1，使用獨顯會導致耗電！
+
+#### 重開機並檢測
+
+```bash
+reboot
+```
+
+重開機後於登入時選擇桌面環境指定使用 xorg，目前筆者發現預設使用的 XDG_SESSION 為 wayland，因不明原因導致硬體加速失敗
+
+1. 檢查 XDG_SESSION_TYPE
+
+```bash
+echo $XDG_SESSION_TYPE
+```
+
+xorg 會顯示 x11
+
+2. 檢查 VPAPI & VDPAU
+
+```bash
+vainfo
+vdpauinfo
+```
+
+#### 安裝 chromium
+
+##### chromium-vaapi-bin
+
+由於普通版本的 chromium 無法支援硬體加速，因此社群提供了 vaapi patch 版本的 chromium
+
+```bash
+yay -S chromium-vaapi-bin
+```
+
+##### h264ify
+
+由於 Linux 版本 chromium 啟用硬體解碼之後無法解碼 VP8/VP9 之 4K 60FPS 影片，解法如下:
+
+前往 chrome 擴充套件商店安裝 h264ify
+
+##### 設定 chromium-flags
+
+```bash
+gedit ~/.config/chromium-flags.conf
+```
+
+加入
+
+```
+--enable-accelerated-mjpeg-decode
+--enable-accelerated-video
+```
+
+#### 檢測 chromium
+
+1. 前往 youtube 播放 4k 60fps 影片
+
+2. 開一個 tab 前往 chrome://media-internals，找到開影片 blob 網頁的項目點開檢查:
+
+| property         | value            |
+|------------------|------------------|
+| video_codec_name | h264             |
+| video_decoder    | MojoVideoDecoder |
 
 ## 初次備份
 
